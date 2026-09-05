@@ -17,6 +17,7 @@ import {
 import { PORTFOLIO_DATA } from '@/data/portfolioData';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
+import { TechIcon } from '@/components/ui/TechIcon';
 
 export const TechStack: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -114,8 +115,8 @@ export const TechStack: React.FC = () => {
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 shadow-inner">
-                          {getCategoryIcon(skill.category)}
+                        <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 shadow-inner flex items-center justify-center">
+                          <TechIcon name={skill.name} size="md" />
                         </div>
                         <div>
                           <h3 className="text-base sm:text-lg font-bold text-white font-sans">

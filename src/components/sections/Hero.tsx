@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { PORTFOLIO_DATA } from '@/data/portfolioData';
 import { Badge } from '@/components/ui/Badge';
+import { TechIcon } from '@/components/ui/TechIcon';
 
 export const Hero: React.FC = () => {
   const [activeCodeTab, setActiveCodeTab] = useState<'flashlist' | 'mmkv' | 'sync'>('flashlist');
@@ -221,7 +222,7 @@ export const useLeadsQuery = () =>
                   <span className="h-3 w-3 rounded-full bg-emerald-500/80 inline-block" />
                 </div>
 
-                {/* File Tabs */}
+                {/* File Tabs with Official Tech Icons */}
                 <div className="flex items-center gap-1 font-mono text-xs">
                   <button
                     type="button"
@@ -232,7 +233,7 @@ export const useLeadsQuery = () =>
                         : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
-                    <Zap className="h-3 w-3" />
+                    <TechIcon name="shopify" size="xs" />
                     <span>FlashList.tsx</span>
                   </button>
 
@@ -245,7 +246,7 @@ export const useLeadsQuery = () =>
                         : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
-                    <Database className="h-3 w-3" />
+                    <TechIcon name="mmkv" size="xs" />
                     <span>MMKV.ts</span>
                   </button>
 
@@ -258,7 +259,7 @@ export const useLeadsQuery = () =>
                         : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
-                    <Layers className="h-3 w-3" />
+                    <TechIcon name="supabase" size="xs" />
                     <span>Sync.ts</span>
                   </button>
                 </div>
@@ -285,7 +286,7 @@ export const useLeadsQuery = () =>
                 </pre>
               </div>
 
-              {/* Bottom Telemetry & Ecosystem Status */}
+              {/* Bottom Telemetry & Ecosystem Status with Official Tech Logos */}
               <div className="p-3 bg-slate-900/95 border-t border-slate-800 flex flex-col gap-2 font-mono text-[11px]">
                 <div className="flex items-center justify-between text-slate-400">
                   <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
@@ -299,10 +300,18 @@ export const useLeadsQuery = () =>
 
                 <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-800/80 text-[10px] text-slate-400">
                   <span className="text-slate-400 font-bold">ECOSYSTEM:</span>
-                  <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">Ionic &amp; Capacitor</span>
-                  <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">Supabase</span>
-                  <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">Firebase</span>
-                  <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">MongoDB</span>
+                  <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-200 inline-flex items-center gap-1.5 border border-slate-700/60">
+                    <TechIcon name="ionic" size="xs" /> Ionic &amp; Capacitor
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-200 inline-flex items-center gap-1.5 border border-slate-700/60">
+                    <TechIcon name="supabase" size="xs" /> Supabase
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-200 inline-flex items-center gap-1.5 border border-slate-700/60">
+                    <TechIcon name="firebase" size="xs" /> Firebase
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-200 inline-flex items-center gap-1.5 border border-slate-700/60">
+                    <TechIcon name="mongodb" size="xs" /> MongoDB
+                  </span>
                 </div>
               </div>
             </div>

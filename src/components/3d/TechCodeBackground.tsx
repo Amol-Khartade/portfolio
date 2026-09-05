@@ -12,10 +12,8 @@ import {
   Smartphone,
   Box,
   Flame,
-  Binary,
-  GitBranch,
-  Sparkles,
 } from 'lucide-react';
+import { TechIcon } from '@/components/ui/TechIcon';
 
 interface CodeSnippet {
   id: string;
@@ -299,13 +297,13 @@ export const TechCodeBackground: React.FC = () => {
     },
   ];
 
-  // Floating Animated Tech Badges & Packages
+  // Floating Animated Tech Badges & Packages with Official Vector SVGs
   const techBadges: TechPackageBadge[] = [
     {
       id: 'react-native',
       name: 'React Native',
       pkg: '@react-native/core',
-      icon: <Smartphone className="h-3.5 w-3.5" />,
+      icon: <TechIcon name="react" size="xs" />,
       color: 'border-cyan-500/50 bg-cyan-950/40 text-cyan-200',
       top: '8%',
       left: '12%',
@@ -316,7 +314,7 @@ export const TechCodeBackground: React.FC = () => {
       id: 'typescript',
       name: 'TypeScript',
       pkg: 'typescript@5.x',
-      icon: <Code2 className="h-3.5 w-3.5" />,
+      icon: <TechIcon name="typescript" size="xs" />,
       color: 'border-blue-500/50 bg-blue-950/40 text-blue-200',
       top: '18%',
       left: '26%',
@@ -327,7 +325,7 @@ export const TechCodeBackground: React.FC = () => {
       id: 'flashlist-pkg',
       name: 'Shopify FlashList',
       pkg: '@shopify/flash-list',
-      icon: <Zap className="h-3.5 w-3.5 text-emerald-400" />,
+      icon: <TechIcon name="shopify" size="xs" />,
       color: 'border-emerald-500/50 bg-emerald-950/40 text-emerald-200',
       top: '6%',
       right: '28%',
@@ -338,7 +336,7 @@ export const TechCodeBackground: React.FC = () => {
       id: 'mmkv-pkg',
       name: 'MMKV v4',
       pkg: 'react-native-mmkv',
-      icon: <Database className="h-3.5 w-3.5 text-purple-400" />,
+      icon: <TechIcon name="mmkv" size="xs" />,
       color: 'border-purple-500/50 bg-purple-950/40 text-purple-200',
       top: '52%',
       right: '22%',
@@ -349,7 +347,7 @@ export const TechCodeBackground: React.FC = () => {
       id: 'ionic-cap',
       name: 'Ionic & Capacitor',
       pkg: '@capacitor/core',
-      icon: <Layers className="h-3.5 w-3.5 text-sky-400" />,
+      icon: <TechIcon name="ionic" size="xs" />,
       color: 'border-sky-500/50 bg-sky-950/40 text-sky-200',
       top: '84%',
       right: '18%',
@@ -360,7 +358,7 @@ export const TechCodeBackground: React.FC = () => {
       id: 'supabase-pkg',
       name: 'Supabase',
       pkg: '@supabase/supabase-js',
-      icon: <Database className="h-3.5 w-3.5 text-emerald-400" />,
+      icon: <TechIcon name="supabase" size="xs" />,
       color: 'border-emerald-500/50 bg-emerald-950/40 text-emerald-200',
       top: '48%',
       left: '14%',
@@ -371,7 +369,7 @@ export const TechCodeBackground: React.FC = () => {
       id: 'firebase-pkg',
       name: 'Firebase',
       pkg: 'firebase/firestore',
-      icon: <Flame className="h-3.5 w-3.5 text-amber-400" />,
+      icon: <TechIcon name="firebase" size="xs" />,
       color: 'border-amber-500/50 bg-amber-950/40 text-amber-200',
       top: '68%',
       left: '20%',
@@ -382,7 +380,7 @@ export const TechCodeBackground: React.FC = () => {
       id: 'mongodb-pkg',
       name: 'MongoDB',
       pkg: 'mongodb',
-      icon: <Database className="h-3.5 w-3.5 text-green-400" />,
+      icon: <TechIcon name="mongodb" size="xs" />,
       color: 'border-green-500/50 bg-green-950/40 text-green-200',
       top: '88%',
       left: '32%',
@@ -390,15 +388,37 @@ export const TechCodeBackground: React.FC = () => {
       duration: 7.8,
     },
     {
-      id: 'ai-tools',
-      name: 'Claude & Antigravity',
-      pkg: 'agentic-engineering',
-      icon: <Cpu className="h-3.5 w-3.5 text-pink-400" />,
-      color: 'border-pink-500/50 bg-pink-950/40 text-pink-200',
+      id: 'tailwind-pkg',
+      name: 'Tailwind CSS',
+      pkg: 'tailwindcss',
+      icon: <TechIcon name="tailwind" size="xs" />,
+      color: 'border-cyan-500/50 bg-cyan-950/40 text-cyan-200',
       top: '32%',
       right: '32%',
       delay: 0.9,
       duration: 8.2,
+    },
+    {
+      id: 'expo-pkg',
+      name: 'Expo EAS',
+      pkg: 'expo@52',
+      icon: <TechIcon name="expo" size="xs" />,
+      color: 'border-slate-500/50 bg-slate-900/60 text-slate-200',
+      top: '42%',
+      left: '30%',
+      delay: 2.0,
+      duration: 7.4,
+    },
+    {
+      id: 'ai-tools',
+      name: 'Claude & Antigravity',
+      pkg: 'agentic-engineering',
+      icon: <TechIcon name="claude" size="xs" />,
+      color: 'border-pink-500/50 bg-pink-950/40 text-pink-200',
+      top: '78%',
+      left: '42%',
+      delay: 1.6,
+      duration: 8.6,
     },
   ];
 
