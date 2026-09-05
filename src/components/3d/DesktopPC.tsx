@@ -5,8 +5,6 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RotateCcw, Play, Pause, Compass, Loader2 } from 'lucide-react';
-import { Badge } from '@/components/ui/Badge';
-
 interface DesktopPCProps {
   asBackground?: boolean;
 }
@@ -18,8 +16,20 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
   const [autoRotate, setAutoRotate] = useState(true);
   const autoRotateRef = useRef(true);
   const controlsRef = useRef<OrbitControls | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const modelGroupRef = useRef<THREE.Group | null>(null);
+  const scrollProgressRef = useRef(0);
+  const currentScrollRotY = useRef(-0.22);
+  const currentScrollRotX = useRef(0);
+
+  const [mounted, setMounted] = useState(false);
+
   const initialRotation = useRef<{ x: number; y: number }>({ x: 0, y: -0.22 });
+  const initialCameraPos = useRef<{ x: number; y: number; z: number }>({ x: 0, y: 1.25, z: 3.1 });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     autoRotateRef.current = autoRotate;
@@ -32,16 +42,22 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
     const isLargeScreen = typeof window !== 'undefined' && window.innerWidth >= 1024;
     const isMediumScreen = typeof window !== 'undefined' && window.innerWidth >= 768;
 
-    // 1. Safe Dimensions
+    // 1. Dimensions
     const width = container.clientWidth || (typeof window !== 'undefined' ? window.innerWidth : 1200);
     const height = container.clientHeight || (typeof window !== 'undefined' ? window.innerHeight : 800);
 
     // 2. Scene
     const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x080c14, 0.07);
 
-    // 3. Camera - closer perspective for large, heroic model presence
+    // 3. Camera
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    camera.position.set(0, 1.25, 3.1);
+    camera.position.set(
+      initialCameraPos.current.x,
+      initialCameraPos.current.y,
+      initialCameraPos.current.z
+    );
+    cameraRef.current = camera;
 
     // 4. WebGL Renderer
     let renderer: THREE.WebGLRenderer;
@@ -61,32 +77,32 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.3;
+    renderer.toneMappingExposure = 1.35;
 
     container.appendChild(renderer.domElement);
 
-    // 5. OrbitControls (Full Horizontal & Vertical Orbit with Damping)
+    // 5. OrbitControls (Full Horizontal & Vertical 360° Drag Orbit)
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.enableZoom = false; // Never trap page scrolling
-    controls.maxPolarAngle = Math.PI / 2 - 0.03; // Ground tilt boundary
-    controls.minPolarAngle = 0.12; // High-angle top-down tilt boundary
-    controls.rotateSpeed = 0.8;
+    controls.enableZoom = false; // NEVER trap page scrolling
+    controls.maxPolarAngle = Math.PI / 2 - 0.02; // Prevents going underneath ground plane
+    controls.minPolarAngle = 0.12; // Allows top-down tilt
+    controls.rotateSpeed = 0.85;
     controlsRef.current = controls;
 
-    // 6. Immersive Neon Cyber Lighting System
+    // 6. Cybernetic Lighting System
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
     scene.add(ambientLight);
 
     const hemiLight = new THREE.HemisphereLight(0x38bdf8, 0x080c14, 1.8);
     scene.add(hemiLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 3.0);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 3.2);
     dirLight.position.set(6, 10, 6);
     scene.add(dirLight);
 
-    // High-intensity cyber neon point lights
+    // Accent Neon Point Lights
     const emeraldLight = new THREE.PointLight(0x10b981, 4.5, 12);
     emeraldLight.position.set(-1.2, 0.8, 1.2);
     scene.add(emeraldLight);
@@ -99,13 +115,13 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
     bottomGlow.position.set(0, -0.8, 0);
     scene.add(bottomGlow);
 
-    // 7. Expanded Hologram Rings
+    // 7. Hologram Cyber Rings around Workstation
     const ringGeo = new THREE.RingGeometry(2.6, 2.64, 64);
     const ringMat = new THREE.MeshBasicMaterial({
       color: 0x10b981,
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.4,
+      opacity: 0.45,
     });
     const ringMesh = new THREE.Mesh(ringGeo, ringMat);
     ringMesh.rotation.x = Math.PI / 2;
@@ -117,14 +133,48 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
       color: 0x06b6d4,
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.3,
+      opacity: 0.35,
     });
     const ringMesh2 = new THREE.Mesh(ringGeo2, ringMat2);
     ringMesh2.rotation.x = Math.PI / 2;
     ringMesh2.position.y = isLargeScreen ? -0.95 : -1.15;
     scene.add(ringMesh2);
 
-    // 8. Load & Scale Desktop PC Model (Significantly Larger)
+    // 8. Subtle Floating Cybernetic Dust Particles
+    const particleCount = 130;
+    const particleGeo = new THREE.BufferGeometry();
+    const particlePositions = new Float32Array(particleCount * 3);
+    const particleColors = new Float32Array(particleCount * 3);
+
+    const pColorEmerald = new THREE.Color(0x10b981);
+    const pColorCyan = new THREE.Color(0x06b6d4);
+
+    for (let i = 0; i < particleCount; i++) {
+      particlePositions[i * 3] = (Math.random() - 0.5) * 12;
+      particlePositions[i * 3 + 1] = (Math.random() - 0.5) * 8;
+      particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+
+      const col = i % 2 === 0 ? pColorEmerald : pColorCyan;
+      particleColors[i * 3] = col.r;
+      particleColors[i * 3 + 1] = col.g;
+      particleColors[i * 3 + 2] = col.b;
+    }
+
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+    particleGeo.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+
+    const particleMat = new THREE.PointsMaterial({
+      size: 0.04,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.65,
+      blending: THREE.AdditiveBlending,
+    });
+
+    const particles = new THREE.Points(particleGeo, particleMat);
+    scene.add(particles);
+
+    // 9. Load & Scale Desktop PC GLTF Model
     const modelGroup = new THREE.Group();
     scene.add(modelGroup);
     modelGroupRef.current = modelGroup;
@@ -143,13 +193,13 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
         const size = box.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z);
 
-        // Substantially increased scale factor (+55% larger!)
+        // Prominent large scale factor
         const scaleFactor = isLargeScreen ? 3.85 : isMediumScreen ? 3.3 : 2.85;
         const scale = scaleFactor / maxDim;
 
         model.scale.setScalar(scale);
 
-        // Position: offset toward right on desktop to frame copy, centered on mobile
+        // Position: offset slightly right on desktop to frame copy, centered on mobile
         const offsetX = isLargeScreen ? 1.05 : 0;
         const offsetY = isLargeScreen ? -0.42 : -0.68;
 
@@ -192,22 +242,19 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
       }
     );
 
-    // 9. Vertical & Horizontal Scroll Reactive Parallax
-    let lastScrollY = typeof window !== 'undefined' ? window.scrollY : 0;
-
+    // 10. Whole-Page Scroll-Linked Dynamic Rotation
     const onScroll = () => {
-      const currentScrollY = window.scrollY;
-      const scrollDelta = (currentScrollY - lastScrollY) * 0.002;
-      lastScrollY = currentScrollY;
-
-      if (modelGroupRef.current) {
-        modelGroupRef.current.rotation.y += scrollDelta * 1.3;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollHeight > 0) {
+        const progress = Math.min(Math.max(window.scrollY / scrollHeight, 0), 1);
+        scrollProgressRef.current = progress;
       }
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
 
-    // 10. Window Resize Handler
+    // 11. Window Resize Handler
     const onResize = () => {
       if (!container || !renderer) return;
       const newWidth = container.clientWidth || window.innerWidth;
@@ -219,7 +266,7 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
 
     window.addEventListener('resize', onResize);
 
-    // 11. Animation Loop
+    // 12. Animation Loop with Smooth Interpolation
     let animationFrameId: number;
     let isVisible = true;
 
@@ -239,10 +286,27 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
 
       // Smooth auto-rotation
       controls.autoRotate = autoRotateRef.current;
-      controls.autoRotateSpeed = 0.8;
+      controls.autoRotateSpeed = 0.85;
 
-      ringMesh.rotation.z += delta * 0.12;
+      // Hologram ring rotation
+      ringMesh.rotation.z += delta * 0.14;
       ringMesh2.rotation.z -= delta * 0.18;
+
+      // Gentle particle drift
+      particles.rotation.y += delta * 0.03;
+
+      // Dynamic Scroll-Linked Model Orbiting:
+      // Smoothly rotate the PC through 360° across the full page!
+      if (modelGroupRef.current) {
+        const targetRotY = initialRotation.current.y + scrollProgressRef.current * (Math.PI * 2.2);
+        const targetRotX = Math.sin(scrollProgressRef.current * Math.PI) * 0.14;
+
+        currentScrollRotY.current += (targetRotY - currentScrollRotY.current) * 0.06;
+        currentScrollRotX.current += (targetRotX - currentScrollRotX.current) * 0.06;
+
+        modelGroupRef.current.rotation.y = currentScrollRotY.current;
+        modelGroupRef.current.rotation.x = currentScrollRotX.current;
+      }
 
       controls.update();
       renderer.render(scene, camera);
@@ -250,7 +314,7 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
 
     animate();
 
-    // 12. Cleanup
+    // 13. Cleanup
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('scroll', onScroll);
@@ -261,6 +325,8 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
       ringMat.dispose();
       ringGeo2.dispose();
       ringMat2.dispose();
+      particleGeo.dispose();
+      particleMat.dispose();
       controls.dispose();
 
       if (container.contains(renderer.domElement)) {
@@ -271,17 +337,36 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
   }, []);
 
   const handleResetView = () => {
-    if (controlsRef.current && modelGroupRef.current) {
+    if (controlsRef.current && modelGroupRef.current && cameraRef.current) {
       controlsRef.current.reset();
+      cameraRef.current.position.set(
+        initialCameraPos.current.x,
+        initialCameraPos.current.y,
+        initialCameraPos.current.z
+      );
+      currentScrollRotY.current = initialRotation.current.y;
+      currentScrollRotX.current = 0;
       modelGroupRef.current.rotation.set(0, initialRotation.current.y, 0);
     }
   };
+
+  if (!mounted) {
+    return (
+      <div
+        className={
+          asBackground
+            ? 'fixed inset-0 w-full h-full pointer-events-none z-0 overflow-hidden bg-[#080c14]'
+            : 'relative w-full h-[450px] sm:h-[540px] lg:h-[620px] rounded-2xl border border-slate-800/80 bg-slate-950/70 overflow-hidden'
+        }
+      />
+    );
+  }
 
   return (
     <div
       className={
         asBackground
-          ? 'absolute inset-0 w-full h-full overflow-hidden'
+          ? 'fixed inset-0 w-full h-full pointer-events-auto z-0 overflow-hidden'
           : 'relative w-full h-[450px] sm:h-[540px] lg:h-[620px] rounded-2xl border border-slate-800/80 bg-slate-950/70 backdrop-blur-xl overflow-hidden'
       }
     >
@@ -294,10 +379,10 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
 
       {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center gap-3 z-20 font-mono text-xs">
+        <div className="fixed inset-0 bg-[#080c14]/90 backdrop-blur-md flex flex-col items-center justify-center gap-3 z-50 font-mono text-xs pointer-events-none">
           <Loader2 className="h-8 w-8 text-emerald-400 animate-spin" />
           <div className="text-slate-200 font-bold tracking-wider">
-            LOADING 3D WORKSTATION...
+            INITIALIZING 3D WORKSTATION...
           </div>
           <div className="w-48 bg-slate-900 rounded-full h-1.5 overflow-hidden border border-slate-800">
             <div
@@ -309,20 +394,20 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
         </div>
       )}
 
-      {/* Floating 3D Interaction Badge and Controls (Bottom-Right of Hero) */}
-      <div className="absolute bottom-6 right-6 z-20 flex flex-wrap items-center gap-2 pointer-events-auto">
-        <div className="hidden sm:flex items-center gap-1.5 font-mono text-xs text-slate-300 bg-slate-950/80 border border-slate-800/90 px-3 py-1.5 rounded-xl backdrop-blur-md shadow-lg">
+      {/* Persistent Floating 3D Interaction Badge & Controls (Bottom-Right of Viewport) */}
+      <div className="fixed bottom-6 right-6 z-30 flex flex-wrap items-center gap-2 pointer-events-auto select-none">
+        <div className="hidden sm:flex items-center gap-1.5 font-mono text-xs text-slate-300 bg-slate-950/85 border border-slate-800/90 px-3 py-1.5 rounded-xl backdrop-blur-md shadow-xl">
           <Compass className="h-3.5 w-3.5 text-cyan-400" />
-          <span>360° DRAG ORBIT (H &amp; V)</span>
+          <span>360° ORBIT (H &amp; V)</span>
         </div>
 
         <button
           type="button"
           onClick={() => setAutoRotate(!autoRotate)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono border backdrop-blur-md transition-all shadow-lg ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono border backdrop-blur-md transition-all shadow-xl ${
             autoRotate
               ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-              : 'bg-slate-950/80 text-slate-400 border-slate-800 hover:text-white'
+              : 'bg-slate-950/85 text-slate-400 border-slate-800 hover:text-white'
           }`}
           title={autoRotate ? 'Pause Auto-Spin' : 'Resume Auto-Spin'}
         >
@@ -342,8 +427,8 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
         <button
           type="button"
           onClick={handleResetView}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono bg-slate-950/80 text-slate-400 border border-slate-800/90 hover:text-white hover:border-slate-700 backdrop-blur-md transition-all shadow-lg"
-          title="Reset to default angle"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono bg-slate-950/85 text-slate-400 border border-slate-800/90 hover:text-white hover:border-slate-700 backdrop-blur-md transition-all shadow-xl active:scale-95"
+          title="Reset 3D view to default angle"
         >
           <RotateCcw className="h-3.5 w-3.5" />
           <span className="hidden xs:inline">Reset</span>

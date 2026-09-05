@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
@@ -16,32 +15,13 @@ import {
 import { PORTFOLIO_DATA } from '@/data/portfolioData';
 import { Badge } from '@/components/ui/Badge';
 
-// Dynamically import DesktopPC with SSR disabled for static export compatibility
-const DesktopPC = dynamic(
-  () => import('@/components/3d/DesktopPC').then((mod) => mod.DesktopPC),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="absolute inset-0 bg-[#080c14] flex flex-col items-center justify-center gap-3 font-mono text-xs text-slate-500">
-        <div className="h-8 w-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
-        <span>INITIALIZING 3D STAGE...</span>
-      </div>
-    ),
-  }
-);
-
 export const Hero: React.FC = () => {
   return (
     <section
       id="hero"
       className="relative min-h-screen pt-28 pb-20 flex flex-col justify-center overflow-hidden"
     >
-      {/* 1. Full-Bleed 3D Desktop PC Background Canvas */}
-      <div className="absolute inset-0 z-0">
-        <DesktopPC asBackground={true} />
-      </div>
-
-      {/* 2. Cybernetic Ambient Vignette & Readability Gradient Overlay */}
+      {/* Cybernetic Ambient Vignette & Readability Gradient Overlay */}
       {/* Left side gradient ensures hero copy contrast exceeds 4.5:1 WCAG standards */}
       <div className="absolute inset-0 bg-gradient-to-r from-[#080c14]/95 via-[#080c14]/75 to-transparent pointer-events-none z-[1]" />
       <div className="absolute inset-0 bg-gradient-to-t from-[#080c14] via-transparent to-transparent pointer-events-none z-[1]" />

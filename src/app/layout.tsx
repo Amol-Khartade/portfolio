@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import { Background3D } from '@/components/3d/Background3D';
+import { DesktopPC } from '@/components/3d/DesktopPC';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 
@@ -62,11 +62,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark scroll-smooth">
       <body className="bg-[#080c14] text-slate-100 antialiased min-h-screen relative selection:bg-emerald-500/30 selection:text-emerald-200">
-        {/* Full-Screen Interactive Three.js Background Canvas */}
-        <Background3D />
+        {/* Full-Site Interactive 3D Workstation Background Canvas */}
+        <DesktopPC asBackground={true} />
+
+        {/* Cybernetic Readability & Ambient Contrast Overlay */}
+        <div className="fixed inset-0 pointer-events-none z-[1] bg-gradient-to-b from-[#080c14]/50 via-[#080c14]/25 to-[#080c14]/85" />
 
         {/* Ambient Top Glow */}
-        <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-48 bg-gradient-to-b from-emerald-500/10 via-transparent to-transparent blur-3xl pointer-events-none z-0" />
+        <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-48 bg-gradient-to-b from-emerald-500/10 via-transparent to-transparent blur-3xl pointer-events-none z-[1]" />
 
         {/* Application Navigation Header */}
         <Navbar />
