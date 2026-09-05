@@ -11,7 +11,7 @@ export const Background3D: React.FC = () => {
     const container = mountRef.current;
     if (!container) return;
 
-    // Check WebGL availability
+    // Check WebGL availability safely
     try {
       const testCanvas = document.createElement('canvas');
       const gl =
@@ -26,21 +26,20 @@ export const Background3D: React.FC = () => {
       return;
     }
 
-    // 1. Scene Setup
+    // 1. Safe initial dimensions
+    const width = container.clientWidth || (typeof window !== 'undefined' ? window.innerWidth : 800);
+    const height = container.clientHeight || (typeof window !== 'undefined' ? window.innerHeight : 600);
+
+    // 2. Scene Setup
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x080c14, 0.0018);
 
-    // 2. Camera
-    const camera = new THREE.PerspectiveCamera(
-      60,
-      container.clientWidth / container.clientHeight,
-      1,
-      1000
-    );
+    // 3. Camera
+    const camera = new THREE.PerspectiveCamera(60, Math.max(0.1, width / Math.max(1, height)), 1, 1000);
     camera.position.z = 400;
     camera.position.y = 50;
 
-    // 3. Renderer
+    // 4. Renderer
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({
@@ -53,12 +52,18 @@ export const Background3D: React.FC = () => {
       return;
     }
 
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 1.75));
     renderer.setClearColor(0x000000, 0);
+    renderer.domElement.style.position = 'absolute';
+    renderer.domElement.style.top = '0';
+    renderer.domElement.style.left = '0';
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
+    renderer.domElement.style.pointerEvents = 'none';
     container.appendChild(renderer.domElement);
 
-    // 4. Particle Field (Constellation / Neural Matrix Nodes)
+    // 5. Particle Field (Constellation / Neural Matrix Nodes)
     const particleCount = 280;
     const particleGeometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
@@ -98,28 +103,34 @@ export const Background3D: React.FC = () => {
 
     // Particle texture (soft radial glow)
     const createCircleTexture = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 64;
-      canvas.height = 64;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-        gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.7)');
-        gradient.addColorStop(0.7, 'rgba(16, 185, 129, 0.2)');
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(32, 32, 32, 0, Math.PI * 2);
-        ctx.fill();
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 64;
+        canvas.height = 64;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+          gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+          gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.7)');
+          gradient.addColorStop(0.7, 'rgba(16, 185, 129, 0.2)');
+          gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(32, 32, 32, 0, Math.PI * 2);
+          ctx.fill();
+          return new THREE.CanvasTexture(canvas);
+        }
+      } catch {
+        // fallback to null map
       }
-      return new THREE.CanvasTexture(canvas);
+      return null;
     };
 
+    const particleTexture = createCircleTexture();
     const particleMaterial = new THREE.PointsMaterial({
       size: 6,
       vertexColors: true,
-      map: createCircleTexture(),
+      map: particleTexture || undefined,
       transparent: true,
       opacity: 0.75,
       blending: THREE.AdditiveBlending,
@@ -129,7 +140,7 @@ export const Background3D: React.FC = () => {
     const particles = new THREE.Points(particleGeometry, particleMaterial);
     scene.add(particles);
 
-    // 5. Connecting Constellation Lines
+    // 6. Connecting Constellation Lines
     const lineMaterial = new THREE.LineBasicMaterial({
       color: 0x06b6d4,
       transparent: true,
@@ -148,29 +159,28 @@ export const Background3D: React.FC = () => {
     const lineMesh = new THREE.LineSegments(lineGeometry, lineMaterial);
     scene.add(lineMesh);
 
-    // 6. Perspective Cyberspace Grid Plane
+    // 7. Perspective Cyberspace Grid Plane
     const gridHelper = new THREE.GridHelper(1200, 40, 0x10b981, 0x1e293b);
     gridHelper.position.y = -180;
-    // Set subtle opacity on grid
     if (Array.isArray(gridHelper.material)) {
       gridHelper.material.forEach((mat) => {
         mat.transparent = true;
         mat.opacity = 0.15;
       });
-    } else {
+    } else if (gridHelper.material) {
       gridHelper.material.transparent = true;
       gridHelper.material.opacity = 0.15;
     }
     scene.add(gridHelper);
 
-    // 7. Mouse & Interactive Coordinates
+    // 8. Mouse & Interactive Coordinates
     let mouseX = 0;
     let mouseY = 0;
     let targetX = 0;
     let targetY = 0;
 
-    const windowHalfX = window.innerWidth / 2;
-    const windowHalfY = window.innerHeight / 2;
+    const windowHalfX = (typeof window !== 'undefined' ? window.innerWidth : 800) / 2;
+    const windowHalfY = (typeof window !== 'undefined' ? window.innerHeight : 600) / 2;
 
     const onPointerMove = (event: MouseEvent) => {
       mouseX = (event.clientX - windowHalfX) * 0.15;
@@ -179,17 +189,19 @@ export const Background3D: React.FC = () => {
 
     window.addEventListener('mousemove', onPointerMove, { passive: true });
 
-    // 8. Resize Handler
+    // 9. Resize Handler
     const onResize = () => {
-      if (!container) return;
-      camera.aspect = container.clientWidth / container.clientHeight;
+      if (!container || !renderer) return;
+      const currentWidth = container.clientWidth || window.innerWidth || 800;
+      const currentHeight = container.clientHeight || window.innerHeight || 600;
+      camera.aspect = Math.max(0.1, currentWidth / Math.max(1, currentHeight));
       camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setSize(currentWidth, currentHeight);
     };
 
     window.addEventListener('resize', onResize);
 
-    // 9. Animation Loop with Visibility Optimization
+    // 10. Animation Loop with Visibility Optimization
     let animationFrameId: number;
     let isVisible = true;
 
@@ -207,6 +219,7 @@ export const Background3D: React.FC = () => {
 
       const delta = clock.getDelta();
       const posAttr = particleGeometry.attributes.position as THREE.BufferAttribute;
+      if (!posAttr) return;
       const posArray = posAttr.array as Float32Array;
 
       // Mouse smoothing with dampening
@@ -266,7 +279,7 @@ export const Background3D: React.FC = () => {
 
     animate();
 
-    // 10. Cleanup
+    // 11. Cleanup
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('mousemove', onPointerMove);
@@ -275,11 +288,12 @@ export const Background3D: React.FC = () => {
 
       particleGeometry.dispose();
       particleMaterial.dispose();
+      particleTexture?.dispose();
       lineGeometry.dispose();
       lineMaterial.dispose();
       gridHelper.geometry.dispose();
 
-      if (container.contains(renderer.domElement)) {
+      if (container && renderer.domElement && container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
       renderer.dispose();
@@ -289,7 +303,7 @@ export const Background3D: React.FC = () => {
   return (
     <div
       ref={mountRef}
-      className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
+      className="fixed inset-0 pointer-events-none z-0 overflow-hidden w-full h-full"
       aria-hidden="true"
     >
       {/* Fallback ambient glow in case WebGL is unavailable or initializing */}

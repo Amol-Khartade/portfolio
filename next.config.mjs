@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH?.trim() || '';
 
 const nextConfig = {
   output: 'export',
@@ -7,9 +7,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  basePath: basePath,
-  assetPrefix: basePath ? `${basePath}/` : undefined,
-  // Turbopack / Webpack config if needed for Three.js
+  ...(basePath ? { basePath, assetPrefix: `${basePath}/` } : {}),
   transpilePackages: ['three'],
 };
 
