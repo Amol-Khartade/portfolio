@@ -19,7 +19,7 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
   const autoRotateRef = useRef(true);
   const controlsRef = useRef<OrbitControls | null>(null);
   const modelGroupRef = useRef<THREE.Group | null>(null);
-  const initialRotation = useRef<{ x: number; y: number }>({ x: 0, y: -0.25 });
+  const initialRotation = useRef<{ x: number; y: number }>({ x: 0, y: -0.22 });
 
   useEffect(() => {
     autoRotateRef.current = autoRotate;
@@ -29,6 +29,9 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
     const container = mountRef.current;
     if (!container) return;
 
+    const isLargeScreen = typeof window !== 'undefined' && window.innerWidth >= 1024;
+    const isMediumScreen = typeof window !== 'undefined' && window.innerWidth >= 768;
+
     // 1. Safe Dimensions
     const width = container.clientWidth || (typeof window !== 'undefined' ? window.innerWidth : 1200);
     const height = container.clientHeight || (typeof window !== 'undefined' ? window.innerHeight : 800);
@@ -36,9 +39,9 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
     // 2. Scene
     const scene = new THREE.Scene();
 
-    // 3. Camera
+    // 3. Camera - closer perspective for large, heroic model presence
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    camera.position.set(0, 1.6, 4.2);
+    camera.position.set(0, 1.25, 3.1);
 
     // 4. WebGL Renderer
     let renderer: THREE.WebGLRenderer;
@@ -58,72 +61,73 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
+    renderer.toneMappingExposure = 1.3;
 
     container.appendChild(renderer.domElement);
 
-    // 5. OrbitControls (Full Horizontal & Vertical Orbit)
+    // 5. OrbitControls (Full Horizontal & Vertical Orbit with Damping)
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.enableZoom = false; // Never trap page scrolling
-    controls.maxPolarAngle = Math.PI / 2 - 0.04; // Limit pitch so it does not go below floor
-    controls.minPolarAngle = 0.15; // Vertical tilt upward limit
-    controls.rotateSpeed = 0.75;
+    controls.maxPolarAngle = Math.PI / 2 - 0.03; // Ground tilt boundary
+    controls.minPolarAngle = 0.12; // High-angle top-down tilt boundary
+    controls.rotateSpeed = 0.8;
     controlsRef.current = controls;
 
-    // 6. Lighting System
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
+    // 6. Immersive Neon Cyber Lighting System
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
     scene.add(ambientLight);
 
-    const hemiLight = new THREE.HemisphereLight(0x38bdf8, 0x080c14, 1.6);
+    const hemiLight = new THREE.HemisphereLight(0x38bdf8, 0x080c14, 1.8);
     scene.add(hemiLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 2.6);
-    dirLight.position.set(6, 9, 6);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 3.0);
+    dirLight.position.set(6, 10, 6);
     scene.add(dirLight);
 
-    // Cyberpunk Neon accents
-    const emeraldLight = new THREE.PointLight(0x10b981, 3.5, 9);
-    emeraldLight.position.set(-1.0, 0.6, 0.9);
+    // High-intensity cyber neon point lights
+    const emeraldLight = new THREE.PointLight(0x10b981, 4.5, 12);
+    emeraldLight.position.set(-1.2, 0.8, 1.2);
     scene.add(emeraldLight);
 
-    const cyanLight = new THREE.PointLight(0x06b6d4, 4.0, 9);
-    cyanLight.position.set(1.4, 0.9, -0.6);
+    const cyanLight = new THREE.PointLight(0x06b6d4, 5.0, 12);
+    cyanLight.position.set(1.6, 1.1, -0.6);
     scene.add(cyanLight);
 
-    // 7. Holographic Floor Rings
-    const ringGeo = new THREE.RingGeometry(1.8, 1.83, 64);
+    const bottomGlow = new THREE.PointLight(0x10b981, 2.5, 8);
+    bottomGlow.position.set(0, -0.8, 0);
+    scene.add(bottomGlow);
+
+    // 7. Expanded Hologram Rings
+    const ringGeo = new THREE.RingGeometry(2.6, 2.64, 64);
     const ringMat = new THREE.MeshBasicMaterial({
       color: 0x10b981,
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.35,
+      opacity: 0.4,
     });
     const ringMesh = new THREE.Mesh(ringGeo, ringMat);
     ringMesh.rotation.x = Math.PI / 2;
-    ringMesh.position.y = -0.75;
+    ringMesh.position.y = isLargeScreen ? -0.95 : -1.15;
     scene.add(ringMesh);
 
-    const ringGeo2 = new THREE.RingGeometry(1.35, 1.37, 64);
+    const ringGeo2 = new THREE.RingGeometry(1.95, 1.98, 64);
     const ringMat2 = new THREE.MeshBasicMaterial({
       color: 0x06b6d4,
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.25,
+      opacity: 0.3,
     });
     const ringMesh2 = new THREE.Mesh(ringGeo2, ringMat2);
     ringMesh2.rotation.x = Math.PI / 2;
-    ringMesh2.position.y = -0.75;
+    ringMesh2.position.y = isLargeScreen ? -0.95 : -1.15;
     scene.add(ringMesh2);
 
-    // 8. Load Desktop PC Model
+    // 8. Load & Scale Desktop PC Model (Significantly Larger)
     const modelGroup = new THREE.Group();
     scene.add(modelGroup);
     modelGroupRef.current = modelGroup;
-
-    const isLargeScreen = typeof window !== 'undefined' && window.innerWidth >= 1024;
-    const isMediumScreen = typeof window !== 'undefined' && window.innerWidth >= 768;
 
     const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
     const modelPath = `${basePath}/models/desktop_pc/scene.gltf`;
@@ -139,16 +143,15 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
         const size = box.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z);
 
-        // Adjust scale and horizontal offset based on screen width
-        const scaleFactor = isLargeScreen ? 2.5 : isMediumScreen ? 2.2 : 1.9;
+        // Substantially increased scale factor (+55% larger!)
+        const scaleFactor = isLargeScreen ? 3.85 : isMediumScreen ? 3.3 : 2.85;
         const scale = scaleFactor / maxDim;
 
         model.scale.setScalar(scale);
 
-        // On desktop: offset slightly to the right so left-side hero text has space
-        // On mobile: center and lower slightly
-        const offsetX = isLargeScreen ? 0.95 : 0;
-        const offsetY = isLargeScreen ? -0.28 : -0.55;
+        // Position: offset toward right on desktop to frame copy, centered on mobile
+        const offsetX = isLargeScreen ? 1.05 : 0;
+        const offsetY = isLargeScreen ? -0.42 : -0.68;
 
         model.position.x = -center.x * scale + offsetX;
         model.position.y = -center.y * scale + offsetY;
@@ -157,6 +160,8 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
         ringMesh.position.x = offsetX;
         ringMesh2.position.x = offsetX;
 
+        controls.target.set(offsetX * 0.45, offsetY * 0.3, 0);
+
         modelGroup.rotation.y = initialRotation.current.y;
 
         model.traverse((child) => {
@@ -164,8 +169,8 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
             const mesh = child as THREE.Mesh;
             if (mesh.material) {
               const mat = mesh.material as THREE.MeshStandardMaterial;
-              mat.roughness = Math.min(mat.roughness, 0.7);
-              mat.envMapIntensity = 1.6;
+              mat.roughness = Math.min(mat.roughness, 0.65);
+              mat.envMapIntensity = 1.8;
             }
           }
         });
@@ -196,8 +201,7 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
       lastScrollY = currentScrollY;
 
       if (modelGroupRef.current) {
-        // Smooth rotation when user scrolls vertically
-        modelGroupRef.current.rotation.y += scrollDelta * 1.2;
+        modelGroupRef.current.rotation.y += scrollDelta * 1.3;
       }
     };
 
@@ -233,9 +237,9 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
 
       const delta = clock.getDelta();
 
-      // OrbitControls handles auto-rotation smoothly
+      // Smooth auto-rotation
       controls.autoRotate = autoRotateRef.current;
-      controls.autoRotateSpeed = 0.85;
+      controls.autoRotateSpeed = 0.8;
 
       ringMesh.rotation.z += delta * 0.12;
       ringMesh2.rotation.z -= delta * 0.18;
@@ -278,7 +282,7 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
       className={
         asBackground
           ? 'absolute inset-0 w-full h-full overflow-hidden'
-          : 'relative w-full h-[380px] sm:h-[440px] lg:h-[480px] rounded-2xl border border-slate-800/80 bg-slate-950/70 backdrop-blur-xl overflow-hidden'
+          : 'relative w-full h-[450px] sm:h-[540px] lg:h-[620px] rounded-2xl border border-slate-800/80 bg-slate-950/70 backdrop-blur-xl overflow-hidden'
       }
     >
       {/* 3D Canvas Mount Point */}
@@ -293,7 +297,7 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
         <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center gap-3 z-20 font-mono text-xs">
           <Loader2 className="h-8 w-8 text-emerald-400 animate-spin" />
           <div className="text-slate-200 font-bold tracking-wider">
-            INITIALIZING 3D WORKSTATION...
+            LOADING 3D WORKSTATION...
           </div>
           <div className="w-48 bg-slate-900 rounded-full h-1.5 overflow-hidden border border-slate-800">
             <div
