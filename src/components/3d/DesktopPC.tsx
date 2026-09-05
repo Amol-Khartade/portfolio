@@ -73,7 +73,7 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
     }
 
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 1.75));
+    renderer.setPixelRatio(Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 1.5));
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -217,10 +217,15 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
         model.traverse((child) => {
           if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh;
+            mesh.frustumCulled = true;
             if (mesh.material) {
               const mat = mesh.material as THREE.MeshStandardMaterial;
               mat.roughness = Math.min(mat.roughness, 0.65);
-              mat.envMapIntensity = 1.8;
+              mat.envMapIntensity = 1.6;
+              if (mat.map) {
+                mat.map.generateMipmaps = false;
+                mat.map.minFilter = THREE.LinearFilter;
+              }
             }
           }
         });
@@ -377,29 +382,19 @@ export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => 
         title="Click and drag anywhere to rotate 360° horizontally & vertically"
       />
 
-      {/* Loading Overlay */}
-      {isLoading && (
-        <div className="fixed inset-0 bg-[#080c14]/90 backdrop-blur-md flex flex-col items-center justify-center gap-3 z-50 font-mono text-xs pointer-events-none">
-          <Loader2 className="h-8 w-8 text-emerald-400 animate-spin" />
-          <div className="text-slate-200 font-bold tracking-wider">
-            INITIALIZING 3D WORKSTATION...
-          </div>
-          <div className="w-48 bg-slate-900 rounded-full h-1.5 overflow-hidden border border-slate-800">
-            <div
-              className="bg-emerald-400 h-full transition-all duration-300 shadow-[0_0_10px_#10b981]"
-              style={{ width: `${loadingProgress}%` }}
-            />
-          </div>
-          <div className="text-[10px] text-slate-500">{loadingProgress}%</div>
-        </div>
-      )}
-
       {/* Persistent Floating 3D Interaction Badge & Controls (Bottom-Right of Viewport) */}
       <div className="fixed bottom-6 right-6 z-30 flex flex-wrap items-center gap-2 pointer-events-auto select-none">
-        <div className="hidden sm:flex items-center gap-1.5 font-mono text-xs text-slate-300 bg-slate-950/85 border border-slate-800/90 px-3 py-1.5 rounded-xl backdrop-blur-md shadow-xl">
-          <Compass className="h-3.5 w-3.5 text-cyan-400" />
-          <span>360° ORBIT (H &amp; V)</span>
-        </div>
+        {isLoading ? (
+          <div className="flex items-center gap-2 font-mono text-xs text-emerald-400 bg-slate-950/85 border border-emerald-500/30 px-3 py-1.5 rounded-xl backdrop-blur-md shadow-xl">
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-400" />
+            <span>3D STAGE SYNCING... {loadingProgress}%</span>
+          </div>
+        ) : (
+          <div className="hidden sm:flex items-center gap-1.5 font-mono text-xs text-slate-300 bg-slate-950/85 border border-slate-800/90 px-3 py-1.5 rounded-xl backdrop-blur-md shadow-xl">
+            <Compass className="h-3.5 w-3.5 text-cyan-400" />
+            <span>360° ORBIT (H &amp; V)</span>
+          </div>
+        )}
 
         <button
           type="button"
