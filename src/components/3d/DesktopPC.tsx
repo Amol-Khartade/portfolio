@@ -7,7 +7,11 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RotateCcw, Play, Pause, Compass, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 
-export const DesktopPC: React.FC = () => {
+interface DesktopPCProps {
+  asBackground?: boolean;
+}
+
+export const DesktopPC: React.FC<DesktopPCProps> = ({ asBackground = true }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -15,7 +19,7 @@ export const DesktopPC: React.FC = () => {
   const autoRotateRef = useRef(true);
   const controlsRef = useRef<OrbitControls | null>(null);
   const modelGroupRef = useRef<THREE.Group | null>(null);
-  const initialRotation = useRef<{ x: number; y: number }>({ x: 0, y: -0.3 });
+  const initialRotation = useRef<{ x: number; y: number }>({ x: 0, y: -0.25 });
 
   useEffect(() => {
     autoRotateRef.current = autoRotate;
@@ -26,15 +30,15 @@ export const DesktopPC: React.FC = () => {
     if (!container) return;
 
     // 1. Safe Dimensions
-    const width = container.clientWidth || 600;
-    const height = container.clientHeight || 450;
+    const width = container.clientWidth || (typeof window !== 'undefined' ? window.innerWidth : 1200);
+    const height = container.clientHeight || (typeof window !== 'undefined' ? window.innerHeight : 800);
 
     // 2. Scene
     const scene = new THREE.Scene();
 
     // 3. Camera
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    camera.position.set(0, 1.8, 3.8);
+    camera.position.set(0, 1.6, 4.2);
 
     // 4. WebGL Renderer
     let renderer: THREE.WebGLRenderer;
@@ -54,42 +58,42 @@ export const DesktopPC: React.FC = () => {
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = 1.25;
 
     container.appendChild(renderer.domElement);
 
-    // 5. OrbitControls (Full Horizontal & Vertical Orbit with Safety Limits)
+    // 5. OrbitControls (Full Horizontal & Vertical Orbit)
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.enableZoom = false; // Disable scroll hijack so page scrolls cleanly
-    controls.maxPolarAngle = Math.PI / 2 - 0.05; // Do not go below desk level
+    controls.enableZoom = false; // Never trap page scrolling
+    controls.maxPolarAngle = Math.PI / 2 - 0.04; // Limit pitch so it does not go below floor
     controls.minPolarAngle = 0.15; // Vertical tilt upward limit
-    controls.rotateSpeed = 0.8;
+    controls.rotateSpeed = 0.75;
     controlsRef.current = controls;
 
-    // 6. Cybernetic Lighting System
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+    // 6. Lighting System
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
     scene.add(ambientLight);
 
-    const hemiLight = new THREE.HemisphereLight(0x38bdf8, 0x080c14, 1.5);
+    const hemiLight = new THREE.HemisphereLight(0x38bdf8, 0x080c14, 1.6);
     scene.add(hemiLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 2.5);
-    dirLight.position.set(5, 8, 5);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 2.6);
+    dirLight.position.set(6, 9, 6);
     scene.add(dirLight);
 
-    // Neon accent lights inside/around PC
-    const emeraldLight = new THREE.PointLight(0x10b981, 3, 8);
-    emeraldLight.position.set(-0.8, 0.5, 0.8);
+    // Cyberpunk Neon accents
+    const emeraldLight = new THREE.PointLight(0x10b981, 3.5, 9);
+    emeraldLight.position.set(-1.0, 0.6, 0.9);
     scene.add(emeraldLight);
 
-    const cyanLight = new THREE.PointLight(0x06b6d4, 3.5, 8);
-    cyanLight.position.set(1.2, 0.8, -0.5);
+    const cyanLight = new THREE.PointLight(0x06b6d4, 4.0, 9);
+    cyanLight.position.set(1.4, 0.9, -0.6);
     scene.add(cyanLight);
 
-    // 7. Ground Hologram Ring
-    const ringGeo = new THREE.RingGeometry(1.6, 1.63, 64);
+    // 7. Holographic Floor Rings
+    const ringGeo = new THREE.RingGeometry(1.8, 1.83, 64);
     const ringMat = new THREE.MeshBasicMaterial({
       color: 0x10b981,
       side: THREE.DoubleSide,
@@ -98,11 +102,10 @@ export const DesktopPC: React.FC = () => {
     });
     const ringMesh = new THREE.Mesh(ringGeo, ringMat);
     ringMesh.rotation.x = Math.PI / 2;
-    ringMesh.position.y = -0.7;
+    ringMesh.position.y = -0.75;
     scene.add(ringMesh);
 
-    // Secondary inner cyan ring
-    const ringGeo2 = new THREE.RingGeometry(1.2, 1.22, 64);
+    const ringGeo2 = new THREE.RingGeometry(1.35, 1.37, 64);
     const ringMat2 = new THREE.MeshBasicMaterial({
       color: 0x06b6d4,
       side: THREE.DoubleSide,
@@ -111,13 +114,16 @@ export const DesktopPC: React.FC = () => {
     });
     const ringMesh2 = new THREE.Mesh(ringGeo2, ringMat2);
     ringMesh2.rotation.x = Math.PI / 2;
-    ringMesh2.position.y = -0.7;
+    ringMesh2.position.y = -0.75;
     scene.add(ringMesh2);
 
     // 8. Load Desktop PC Model
     const modelGroup = new THREE.Group();
     scene.add(modelGroup);
     modelGroupRef.current = modelGroup;
+
+    const isLargeScreen = typeof window !== 'undefined' && window.innerWidth >= 1024;
+    const isMediumScreen = typeof window !== 'undefined' && window.innerWidth >= 768;
 
     const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
     const modelPath = `${basePath}/models/desktop_pc/scene.gltf`;
@@ -128,29 +134,38 @@ export const DesktopPC: React.FC = () => {
       (gltf) => {
         const model = gltf.scene;
 
-        // Auto-center & auto-scale model to fit container perfectly
         const box = new THREE.Box3().setFromObject(model);
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z);
-        const scale = 2.4 / maxDim;
+
+        // Adjust scale and horizontal offset based on screen width
+        const scaleFactor = isLargeScreen ? 2.5 : isMediumScreen ? 2.2 : 1.9;
+        const scale = scaleFactor / maxDim;
 
         model.scale.setScalar(scale);
-        model.position.x = -center.x * scale;
-        model.position.y = -center.y * scale - 0.25;
+
+        // On desktop: offset slightly to the right so left-side hero text has space
+        // On mobile: center and lower slightly
+        const offsetX = isLargeScreen ? 0.95 : 0;
+        const offsetY = isLargeScreen ? -0.28 : -0.55;
+
+        model.position.x = -center.x * scale + offsetX;
+        model.position.y = -center.y * scale + offsetY;
         model.position.z = -center.z * scale;
 
-        // Apply slight isometric rotation
+        ringMesh.position.x = offsetX;
+        ringMesh2.position.x = offsetX;
+
         modelGroup.rotation.y = initialRotation.current.y;
 
-        // Enhance materials
         model.traverse((child) => {
           if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh;
             if (mesh.material) {
               const mat = mesh.material as THREE.MeshStandardMaterial;
               mat.roughness = Math.min(mat.roughness, 0.7);
-              mat.envMapIntensity = 1.5;
+              mat.envMapIntensity = 1.6;
             }
           }
         });
@@ -172,18 +187,17 @@ export const DesktopPC: React.FC = () => {
       }
     );
 
-    // 9. Window Scroll Parallax Reaction (Vertical & Horizontal scroll response)
+    // 9. Vertical & Horizontal Scroll Reactive Parallax
     let lastScrollY = typeof window !== 'undefined' ? window.scrollY : 0;
-    let scrollVelocity = 0;
 
     const onScroll = () => {
       const currentScrollY = window.scrollY;
-      scrollVelocity = (currentScrollY - lastScrollY) * 0.0015;
+      const scrollDelta = (currentScrollY - lastScrollY) * 0.002;
       lastScrollY = currentScrollY;
 
       if (modelGroupRef.current) {
-        // Subtle tilt and rotation on vertical scroll
-        modelGroupRef.current.rotation.y += scrollVelocity * 0.8;
+        // Smooth rotation when user scrolls vertically
+        modelGroupRef.current.rotation.y += scrollDelta * 1.2;
       }
     };
 
@@ -192,8 +206,8 @@ export const DesktopPC: React.FC = () => {
     // 10. Window Resize Handler
     const onResize = () => {
       if (!container || !renderer) return;
-      const newWidth = container.clientWidth || 600;
-      const newHeight = container.clientHeight || 450;
+      const newWidth = container.clientWidth || window.innerWidth;
+      const newHeight = container.clientHeight || window.innerHeight;
       camera.aspect = newWidth / newHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(newWidth, newHeight);
@@ -219,13 +233,12 @@ export const DesktopPC: React.FC = () => {
 
       const delta = clock.getDelta();
 
-      // Use native OrbitControls auto-rotation
+      // OrbitControls handles auto-rotation smoothly
       controls.autoRotate = autoRotateRef.current;
-      controls.autoRotateSpeed = 1.0;
+      controls.autoRotateSpeed = 0.85;
 
-      // Rotate hologram rings
-      ringMesh.rotation.z += delta * 0.15;
-      ringMesh2.rotation.z -= delta * 0.2;
+      ringMesh.rotation.z += delta * 0.12;
+      ringMesh2.rotation.z -= delta * 0.18;
 
       controls.update();
       renderer.render(scene, camera);
@@ -261,20 +274,26 @@ export const DesktopPC: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full h-[380px] sm:h-[440px] lg:h-[480px] rounded-2xl border border-slate-800/80 bg-slate-950/70 backdrop-blur-xl overflow-hidden shadow-2xl flex items-center justify-center group">
+    <div
+      className={
+        asBackground
+          ? 'absolute inset-0 w-full h-full overflow-hidden'
+          : 'relative w-full h-[380px] sm:h-[440px] lg:h-[480px] rounded-2xl border border-slate-800/80 bg-slate-950/70 backdrop-blur-xl overflow-hidden'
+      }
+    >
       {/* 3D Canvas Mount Point */}
       <div
         ref={mountRef}
         className="w-full h-full cursor-grab active:cursor-grabbing"
-        title="Click and drag to rotate vertically and horizontally"
+        title="Click and drag anywhere to rotate 360° horizontally & vertically"
       />
 
       {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center gap-3 z-20 font-mono text-xs">
+        <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center gap-3 z-20 font-mono text-xs">
           <Loader2 className="h-8 w-8 text-emerald-400 animate-spin" />
-          <div className="text-slate-200 font-bold">
-            LOADING 3D WORKSTATION...
+          <div className="text-slate-200 font-bold tracking-wider">
+            INITIALIZING 3D WORKSTATION...
           </div>
           <div className="w-48 bg-slate-900 rounded-full h-1.5 overflow-hidden border border-slate-800">
             <div
@@ -286,64 +305,46 @@ export const DesktopPC: React.FC = () => {
         </div>
       )}
 
-      {/* Top Telemetry Header */}
-      <div className="absolute top-3.5 left-4 right-4 flex items-center justify-between pointer-events-none z-10">
-        <div className="flex items-center gap-2">
-          <Badge variant="emerald" size="sm" pulse>
-            INTERACTIVE 3D WORKSTATION
-          </Badge>
+      {/* Floating 3D Interaction Badge and Controls (Bottom-Right of Hero) */}
+      <div className="absolute bottom-6 right-6 z-20 flex flex-wrap items-center gap-2 pointer-events-auto">
+        <div className="hidden sm:flex items-center gap-1.5 font-mono text-xs text-slate-300 bg-slate-950/80 border border-slate-800/90 px-3 py-1.5 rounded-xl backdrop-blur-md shadow-lg">
+          <Compass className="h-3.5 w-3.5 text-cyan-400" />
+          <span>360° DRAG ORBIT (H &amp; V)</span>
         </div>
-        <div className="hidden sm:flex items-center gap-1.5 font-mono text-[10px] text-slate-400 bg-slate-900/80 px-2.5 py-1 rounded-full border border-slate-800 backdrop-blur-md">
-          <Compass className="h-3 w-3 text-cyan-400" />
-          <span>360° ORBIT: HORIZONTAL &amp; VERTICAL</span>
-        </div>
+
+        <button
+          type="button"
+          onClick={() => setAutoRotate(!autoRotate)}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono border backdrop-blur-md transition-all shadow-lg ${
+            autoRotate
+              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
+              : 'bg-slate-950/80 text-slate-400 border-slate-800 hover:text-white'
+          }`}
+          title={autoRotate ? 'Pause Auto-Spin' : 'Resume Auto-Spin'}
+        >
+          {autoRotate ? (
+            <>
+              <Pause className="h-3.5 w-3.5" />
+              <span className="hidden xs:inline">Auto-Spin</span>
+            </>
+          ) : (
+            <>
+              <Play className="h-3.5 w-3.5" />
+              <span className="hidden xs:inline">Auto-Spin</span>
+            </>
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleResetView}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono bg-slate-950/80 text-slate-400 border border-slate-800/90 hover:text-white hover:border-slate-700 backdrop-blur-md transition-all shadow-lg"
+          title="Reset to default angle"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          <span className="hidden xs:inline">Reset</span>
+        </button>
       </div>
-
-      {/* Bottom Floating Controls */}
-      <div className="absolute bottom-3.5 left-4 right-4 flex items-center justify-between z-10">
-        <div className="flex items-center gap-1.5 font-mono text-[11px] text-slate-400 bg-slate-900/90 px-3 py-1.5 rounded-lg border border-slate-800 backdrop-blur-md pointer-events-auto">
-          <span className="h-2 w-2 rounded-full bg-emerald-400 inline-block animate-pulse" />
-          <span className="hidden xs:inline">Drag to Orbit</span>
-        </div>
-
-        <div className="flex items-center gap-2 pointer-events-auto">
-          <button
-            type="button"
-            onClick={() => setAutoRotate(!autoRotate)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono border transition-all ${
-              autoRotate
-                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
-                : 'bg-slate-900/90 text-slate-400 border-slate-800 hover:text-white'
-            }`}
-            title={autoRotate ? 'Pause Auto-Spin' : 'Resume Auto-Spin'}
-          >
-            {autoRotate ? (
-              <>
-                <Pause className="h-3 w-3" />
-                <span className="hidden sm:inline">Spinning</span>
-              </>
-            ) : (
-              <>
-                <Play className="h-3 w-3" />
-                <span className="hidden sm:inline">Auto-Spin</span>
-              </>
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={handleResetView}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-900/90 text-slate-400 border border-slate-800 hover:text-white hover:border-slate-700 transition-all"
-            title="Reset to default angle"
-          >
-            <RotateCcw className="h-3 w-3" />
-            <span className="hidden sm:inline">Reset</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Subtle Corner Vignette */}
-      <div className="absolute inset-0 pointer-events-none rounded-2xl ring-1 ring-inset ring-white/5" />
     </div>
   );
 };

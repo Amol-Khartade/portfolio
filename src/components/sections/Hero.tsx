@@ -10,22 +10,21 @@ import {
   Activity,
   Cpu,
   Smartphone,
-  ChevronRight,
   CheckCircle2,
   Terminal,
 } from 'lucide-react';
 import { PORTFOLIO_DATA } from '@/data/portfolioData';
 import { Badge } from '@/components/ui/Badge';
 
-// Dynamically import the 3D Desktop PC component to avoid SSR canvas mismatch
+// Dynamically import DesktopPC with SSR disabled for static export compatibility
 const DesktopPC = dynamic(
   () => import('@/components/3d/DesktopPC').then((mod) => mod.DesktopPC),
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[380px] sm:h-[440px] lg:h-[480px] rounded-2xl border border-slate-800/80 bg-slate-950/70 backdrop-blur-xl flex flex-col items-center justify-center gap-3 font-mono text-xs text-slate-400">
+      <div className="absolute inset-0 bg-[#080c14] flex flex-col items-center justify-center gap-3 font-mono text-xs text-slate-500">
         <div className="h-8 w-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
-        <span className="text-slate-300 font-bold">INITIALIZING 3D WORKSTATION...</span>
+        <span>INITIALIZING 3D STAGE...</span>
       </div>
     ),
   }
@@ -37,17 +36,29 @@ export const Hero: React.FC = () => {
       id="hero"
       className="relative min-h-screen pt-28 pb-20 flex flex-col justify-center overflow-hidden"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          {/* Main Hero Column (6 or 7 Cols) */}
+      {/* 1. Full-Bleed 3D Desktop PC Background Canvas */}
+      <div className="absolute inset-0 z-0">
+        <DesktopPC asBackground={true} />
+      </div>
+
+      {/* 2. Cybernetic Ambient Vignette & Readability Gradient Overlay */}
+      {/* Left side gradient ensures hero copy contrast exceeds 4.5:1 WCAG standards */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#080c14]/95 via-[#080c14]/75 to-transparent pointer-events-none z-[1]" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#080c14] via-transparent to-transparent pointer-events-none z-[1]" />
+      <div className="absolute top-0 right-0 w-1/2 h-full bg-[radial-gradient(ellipse_at_top_right,rgba(6,182,212,0.12),transparent_70%)] pointer-events-none z-[1]" />
+
+      {/* 3. Hero Content Foreground Layer (pointer-events-none on wrapper so canvas can receive drag events) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full pointer-events-none">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          {/* Main Hero Column (7 Cols) */}
           <motion.div
-            className="lg:col-span-6 space-y-8"
+            className="lg:col-span-7 space-y-8"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
             {/* Top Status Badges */}
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3 pointer-events-auto">
               <Badge variant="emerald" pulse>
                 PRODUCTION LEAD
               </Badge>
@@ -63,7 +74,7 @@ export const Hero: React.FC = () => {
             {/* Name & Title */}
             <div className="space-y-3">
               <motion.h1
-                className="text-4xl sm:text-6xl lg:text-6xl font-extrabold tracking-tight text-white font-sans"
+                className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white font-sans drop-shadow-lg"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.1 }}
@@ -85,7 +96,7 @@ export const Hero: React.FC = () => {
 
             {/* Headline */}
             <motion.p
-              className="text-lg sm:text-xl text-slate-300 font-light max-w-2xl leading-relaxed border-l-2 border-emerald-500/50 pl-4 py-1"
+              className="text-lg sm:text-xl md:text-2xl text-slate-200 font-light max-w-2xl leading-relaxed border-l-2 border-emerald-500/60 pl-4 py-1 drop-shadow"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
@@ -95,7 +106,7 @@ export const Hero: React.FC = () => {
 
             {/* CTAs */}
             <motion.div
-              className="flex flex-wrap items-center gap-4 pt-2"
+              className="flex flex-wrap items-center gap-4 pt-2 pointer-events-auto"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
@@ -110,7 +121,7 @@ export const Hero: React.FC = () => {
 
               <a
                 href="#contact"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-200 hover:text-white font-mono text-sm tracking-wide border border-slate-700/80 hover:border-slate-500 transition-all backdrop-blur-md hover:-translate-y-0.5 active:translate-y-0"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 hover:text-white font-mono text-sm tracking-wide border border-slate-700/80 hover:border-slate-500 transition-all backdrop-blur-md hover:-translate-y-0.5 active:translate-y-0 shadow-lg"
               >
                 <Mail className="h-4 w-4 text-emerald-400" />
                 <span>Contact Me</span>
@@ -119,7 +130,7 @@ export const Hero: React.FC = () => {
 
             {/* Quick Metrics Banner */}
             <motion.div
-              className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6"
+              className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 pointer-events-auto"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.5 }}
@@ -127,7 +138,7 @@ export const Hero: React.FC = () => {
               {PORTFOLIO_DATA.heroMetrics.map((metric, idx) => (
                 <div
                   key={idx}
-                  className="bg-slate-900/50 border border-slate-800/80 rounded-xl p-3.5 backdrop-blur-md"
+                  className="bg-slate-950/70 border border-slate-800/90 rounded-xl p-3.5 backdrop-blur-md shadow-lg hover:border-slate-700 transition-colors"
                 >
                   <div className="text-xl sm:text-2xl font-bold font-mono text-emerald-400">
                     {metric.value}
@@ -143,25 +154,44 @@ export const Hero: React.FC = () => {
             </motion.div>
           </motion.div>
 
-          {/* Interactive 3D Desktop PC Workstation (6 Cols) */}
+          {/* Right Column (5 Cols) - Interactive Hologram Telemetry Card */}
           <motion.div
-            className="lg:col-span-6 space-y-4"
+            className="lg:col-span-5 hidden lg:block pointer-events-auto"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
-            {/* The 3D Desktop PC Component */}
-            <DesktopPC />
-
-            {/* Telemetry Status Bar below the 3D PC */}
-            <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
-              <div className="flex items-center gap-2 text-slate-300">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 inline-block animate-ping" />
-                <span className="text-emerald-400 font-bold">STATUS:</span>
-                <span>LOCKED 60 FPS • FLASHLIST RECYCLED</span>
+            <div className="rounded-2xl border border-slate-800/80 bg-slate-950/60 backdrop-blur-xl p-5 space-y-4 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 inline-block animate-ping" />
+                  <span className="font-mono text-xs font-bold text-slate-200">
+                    REALTIME 3D TELEMETRY
+                  </span>
+                </div>
+                <Badge variant="cyan" size="sm">
+                  GLTF 360°
+                </Badge>
               </div>
-              <div className="text-slate-500 text-[11px]">
-                DRAG ORBIT / SCROLL REACTIVE
+
+              <div className="space-y-2 font-mono text-xs text-slate-400">
+                <div className="flex justify-between items-center">
+                  <span>ORBIT AXIS:</span>
+                  <span className="text-emerald-400 font-bold">HORIZONTAL &amp; VERTICAL</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>SCROLL PARALLAX:</span>
+                  <span className="text-cyan-400 font-bold">ACTIVE (60 FPS)</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>RENDER ENGINE:</span>
+                  <span className="text-slate-300">THREE.JS / ACES FILMIC</span>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-900 flex items-center gap-2 text-[11px] font-mono text-slate-400">
+                <span className="text-emerald-400">✦</span>
+                <span>Click &amp; drag anywhere to rotate the 3D PC</span>
               </div>
             </div>
           </motion.div>
