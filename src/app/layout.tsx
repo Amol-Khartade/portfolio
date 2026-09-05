@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import { DesktopPC } from '@/components/3d/DesktopPC';
+import { TechCodeBackground } from '@/components/3d/TechCodeBackground';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 
@@ -62,8 +62,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark scroll-smooth">
       <body className="bg-[#080c14] text-slate-100 antialiased min-h-screen relative selection:bg-emerald-500/30 selection:text-emerald-200">
-        {/* Full-Site Interactive 3D Workstation Background Canvas */}
-        <DesktopPC asBackground={true} />
+        {/* Full-Site Interactive Tech, Animated Icons & Syntax Background */}
+        <TechCodeBackground />
 
         {/* Cybernetic Readability & Ambient Contrast Overlay */}
         <div className="fixed inset-0 pointer-events-none z-[1] bg-gradient-to-b from-[#080c14]/50 via-[#080c14]/25 to-[#080c14]/85" />

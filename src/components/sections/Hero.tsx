@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
@@ -11,11 +11,82 @@ import {
   Smartphone,
   CheckCircle2,
   Terminal,
+  Code2,
+  Database,
+  Copy,
+  Check,
+  Layers,
+  Sparkles,
 } from 'lucide-react';
 import { PORTFOLIO_DATA } from '@/data/portfolioData';
 import { Badge } from '@/components/ui/Badge';
 
 export const Hero: React.FC = () => {
+  const [activeCodeTab, setActiveCodeTab] = useState<'flashlist' | 'mmkv' | 'sync'>('flashlist');
+  const [copied, setCopied] = useState(false);
+
+  const codeSnippets = {
+    flashlist: {
+      file: 'FlashListEngine.tsx',
+      pkg: '@shopify/flash-list',
+      icon: <Zap className="h-3.5 w-3.5 text-emerald-400" />,
+      metric: '60 FPS LOCKED • VIEW RECYCLING',
+      code: `// Deterministic 60fps View Recycling Engine
+import { FlashList } from "@shopify/flash-list";
+
+export const CRMLeadFeed = ({ leads }: Props) => (
+  <FlashList
+    data={leads}
+    estimatedItemSize={68}
+    renderItem={({ item }) => <LeadCard lead={item} />}
+    recycleItems={true}
+    getItemType={(item) => item.pipelineStatus}
+    keyExtractor={(item) => item.uuid}
+  />
+);`,
+    },
+    mmkv: {
+      file: 'OfflineStorage.ts',
+      pkg: 'react-native-mmkv v4',
+      icon: <Database className="h-3.5 w-3.5 text-cyan-400" />,
+      metric: '< 1ms COLD READ • C++ DIRECT IO',
+      code: `// Sub-millisecond C++ Memory Mapped Persistence
+import { MMKV } from "react-native-mmkv";
+
+export const leadCache = new MMKV({ id: "crm-v4" });
+
+export const syncOfflineLeads = (records: Lead[]) => {
+  leadCache.set("offline_payload", JSON.stringify(records));
+  // Direct C++ memory access: 30x faster than SQLite
+};`,
+    },
+    sync: {
+      file: 'RealtimeSync.ts',
+      pkg: '@tanstack/react-query',
+      icon: <Layers className="h-3.5 w-3.5 text-purple-400" />,
+      metric: 'OFFLINE-FIRST REALTIME SYNC',
+      code: `// TanStack Query v5 + Supabase Realtime
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+
+export const useLeadsQuery = () =>
+  useQuery({
+    queryKey: ["leads", "offline_first"],
+    queryFn: async () => {
+      const { data } = await supabase.from("leads").select("*");
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+  });`,
+    },
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(codeSnippets[activeCodeTab].code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <section
       id="hero"
@@ -134,44 +205,105 @@ export const Hero: React.FC = () => {
             </motion.div>
           </motion.div>
 
-          {/* Right Column (5 Cols) - Interactive Hologram Telemetry Card */}
+          {/* Right Column (5 Cols) - Interactive Architecture & Live Code Terminal */}
           <motion.div
             className="lg:col-span-5 hidden lg:block pointer-events-auto"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
-            <div className="rounded-2xl border border-slate-800/80 bg-slate-950/60 backdrop-blur-xl p-5 space-y-4 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="rounded-2xl border border-slate-700/80 bg-slate-950/80 backdrop-blur-2xl shadow-2xl overflow-hidden">
+              {/* Window Header with Traffic Lights and File Tabs */}
+              <div className="flex items-center justify-between px-4 py-3 bg-slate-900/90 border-b border-slate-800">
                 <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 inline-block animate-ping" />
-                  <span className="font-mono text-xs font-bold text-slate-200">
-                    REALTIME 3D TELEMETRY
+                  <span className="h-3 w-3 rounded-full bg-rose-500/80 inline-block" />
+                  <span className="h-3 w-3 rounded-full bg-amber-500/80 inline-block" />
+                  <span className="h-3 w-3 rounded-full bg-emerald-500/80 inline-block" />
+                </div>
+
+                {/* File Tabs */}
+                <div className="flex items-center gap-1 font-mono text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setActiveCodeTab('flashlist')}
+                    className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5 ${
+                      activeCodeTab === 'flashlist'
+                        ? 'bg-slate-800 text-emerald-400 font-bold border border-emerald-500/30 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Zap className="h-3 w-3" />
+                    <span>FlashList.tsx</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveCodeTab('mmkv')}
+                    className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5 ${
+                      activeCodeTab === 'mmkv'
+                        ? 'bg-slate-800 text-cyan-400 font-bold border border-cyan-500/30 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Database className="h-3 w-3" />
+                    <span>MMKV.ts</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveCodeTab('sync')}
+                    className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5 ${
+                      activeCodeTab === 'sync'
+                        ? 'bg-slate-800 text-purple-400 font-bold border border-purple-500/30 shadow-sm'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Layers className="h-3 w-3" />
+                    <span>Sync.ts</span>
+                  </button>
+                </div>
+
+                {/* Copy Button */}
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="text-slate-400 hover:text-white p-1 rounded transition-colors"
+                  title="Copy code to clipboard"
+                >
+                  {copied ? (
+                    <Check className="h-3.5 w-3.5 text-emerald-400" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
+                </button>
+              </div>
+
+              {/* Live Code Area */}
+              <div className="p-4 font-mono text-xs text-slate-300 leading-relaxed bg-slate-950/90 overflow-x-auto min-h-[220px]">
+                <pre className="text-slate-200 whitespace-pre">
+                  <code>{codeSnippets[activeCodeTab].code}</code>
+                </pre>
+              </div>
+
+              {/* Bottom Telemetry & Ecosystem Status */}
+              <div className="p-3 bg-slate-900/95 border-t border-slate-800 flex flex-col gap-2 font-mono text-[11px]">
+                <div className="flex items-center justify-between text-slate-400">
+                  <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                    {codeSnippets[activeCodeTab].metric}
+                  </span>
+                  <span className="text-cyan-400 font-medium">
+                    {codeSnippets[activeCodeTab].pkg}
                   </span>
                 </div>
-                <Badge variant="cyan" size="sm">
-                  GLTF 360°
-                </Badge>
-              </div>
 
-              <div className="space-y-2 font-mono text-xs text-slate-400">
-                <div className="flex justify-between items-center">
-                  <span>ORBIT AXIS:</span>
-                  <span className="text-emerald-400 font-bold">HORIZONTAL &amp; VERTICAL</span>
+                <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-800/80 text-[10px] text-slate-400">
+                  <span className="text-slate-400 font-bold">ECOSYSTEM:</span>
+                  <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">Ionic &amp; Capacitor</span>
+                  <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">Supabase</span>
+                  <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">Firebase</span>
+                  <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">MongoDB</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span>SCROLL PARALLAX:</span>
-                  <span className="text-cyan-400 font-bold">ACTIVE (60 FPS)</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span>RENDER ENGINE:</span>
-                  <span className="text-slate-300">THREE.JS / ACES FILMIC</span>
-                </div>
-              </div>
-
-              <div className="pt-2 border-t border-slate-900 flex items-center gap-2 text-[11px] font-mono text-slate-400">
-                <span className="text-emerald-400">✦</span>
-                <span>Click &amp; drag anywhere to rotate the 3D PC</span>
               </div>
             </div>
           </motion.div>
