@@ -22,7 +22,7 @@ export interface ExperienceItem {
 
 export interface TechSkill {
   name: string;
-  category: 'Core Mobile' | 'Performance & State' | 'DevOps & Tooling' | 'AI & Automation';
+  category: 'Core Mobile' | 'Performance & State' | 'Cloud & Databases' | 'DevOps & Tooling' | 'AI & Automation';
   proficiency: string;
   description: string;
   highlight?: boolean;
@@ -137,10 +137,14 @@ export const PORTFOLIO_DATA = {
       techStack: [
         'React Native',
         'Expo',
+        'Ionic & Capacitor',
         'TypeScript',
         'Shopify FlashList',
         'TanStack Query',
         'react-native-mmkv v4',
+        'Supabase',
+        'Firebase',
+        'MongoDB',
         'Zod',
         'Tailwind CSS',
         'EAS Build',
@@ -181,6 +185,13 @@ export const PORTFOLIO_DATA = {
           description: 'Design system tokenization, NativeWind styling, and performant utility-first cross-platform UI.',
         },
         {
+          name: 'Ionic & Capacitor',
+          category: 'Core Mobile' as const,
+          proficiency: 'Advanced',
+          description: 'Hybrid mobile architecture, Capacitor native plugins, cross-platform bridge orchestration, and enterprise web-to-native PWAs.',
+          highlight: true,
+        },
+        {
           name: 'Zod',
           category: 'Core Mobile' as const,
           proficiency: 'Advanced',
@@ -210,6 +221,32 @@ export const PORTFOLIO_DATA = {
           category: 'Performance & State' as const,
           proficiency: 'Advanced',
           description: 'Optimistic mutations, intelligent caching, offline persistence garbage collection, and retry logic.',
+          highlight: true,
+        },
+      ],
+    },
+    {
+      name: 'Cloud, BaaS & Databases',
+      skills: [
+        {
+          name: 'Supabase',
+          category: 'Cloud & Databases' as const,
+          proficiency: 'Advanced',
+          description: 'Real-time PostgreSQL subscriptions, Row Level Security (RLS) policies, Edge Functions, and reactive offline state sync.',
+          highlight: true,
+        },
+        {
+          name: 'Firebase',
+          category: 'Cloud & Databases' as const,
+          proficiency: 'Advanced',
+          description: 'Cloud Firestore real-time listeners, Firebase Auth, Cloud Messaging (FCM push notifications), and serverless rules.',
+          highlight: true,
+        },
+        {
+          name: 'MongoDB',
+          category: 'Cloud & Databases' as const,
+          proficiency: 'Advanced',
+          description: 'Document schema design, aggregation pipelines, high-throughput CRM data persistence, and Realm offline sync.',
           highlight: true,
         },
       ],

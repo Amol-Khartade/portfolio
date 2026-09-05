@@ -23,10 +23,7 @@ export const TechStack: React.FC = () => {
 
   const categories = [
     'All',
-    'Core Mobile & Languages',
-    'Performance, State & Storage',
-    'DevOps & Native Infrastructure',
-    'AI Agentic Tooling',
+    ...PORTFOLIO_DATA.techStackCategories.map((c) => c.name),
   ];
 
   const allSkills = PORTFOLIO_DATA.techStackCategories.flatMap((cat) =>
@@ -44,6 +41,8 @@ export const TechStack: React.FC = () => {
         return <Smartphone className="h-5 w-5 text-emerald-400" />;
       case 'Performance & State':
         return <Zap className="h-5 w-5 text-cyan-400" />;
+      case 'Cloud & Databases':
+        return <Database className="h-5 w-5 text-cyan-400" />;
       case 'DevOps & Tooling':
         return <Server className="h-5 w-5 text-purple-400" />;
       case 'AI & Automation':
@@ -106,7 +105,7 @@ export const TechStack: React.FC = () => {
                   glow={
                     skill.category === 'Core Mobile'
                       ? 'emerald'
-                      : skill.category === 'Performance & State'
+                      : skill.category === 'Performance & State' || skill.category === 'Cloud & Databases'
                       ? 'cyan'
                       : 'purple'
                   }
